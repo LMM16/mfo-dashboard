@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MFO Brasil — Inteligência de Mercado</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--ink:#0d0d0d;--muted:#5a5a5a;--subtle:#a0a0a0;--line:#e0ddd8;--bg:#f5f3ee;--card:#fdfcfa;--gold:#b8965a;--gold-pale:#f5eed9;--green:#2d6a4f;--green-pale:#d8ede2;--red:#9b2335;--red-pale:#f5dde0;--blue:#1a3a6b;--blue-pale:#dae3f5}
+:root{--ink:#0d0d0d;--muted:#5a5a5a;--subtle:#a0a0a0;--line:#e0ddd8;--bg:#f5f3ee;--card:#fdfcfa;--gold:#b8965a;--gold-pale:#f5eed9;--green:#2d6a4f;--green-pale:#d8ede2;--red:#9b2335;--red-pale:#f5dde0;--blue:#1a3a6b}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
 .shell{display:grid;grid-template-columns:210px 1fr;min-height:100vh}
@@ -25,8 +24,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-hei
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;vertical-align:middle}
 .main{overflow-y:auto}
 .topbar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.topbar-t{font-size:14px;font-weight:700}
-.topbar-m{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-top:2px}
+.topbar-t{font-size:14px;font-weight:700}.topbar-m{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-top:2px}
 .updated{font-family:'DM Mono',monospace;font-size:9px;background:var(--green-pale);color:var(--green);padding:4px 10px;border-radius:20px}
 .content{padding:24px 28px}
 .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
@@ -36,38 +34,23 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-hei
 .kpi-d{font-family:'DM Mono',monospace;font-size:10px;margin-top:5px;color:var(--green)}
 .grid-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:24px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
-.card-t{font-size:12px;font-weight:700;margin-bottom:4px}
-.card-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-bottom:16px}
-.ch{position:relative}
+.card-t{font-size:12px;font-weight:700;margin-bottom:4px}.card-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-bottom:16px}
 .sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.sec-hd h2{font-size:13px;font-weight:700}
-.sec-cnt{font-family:'DM Mono',monospace;font-size:10px;color:var(--subtle)}
+.sec-hd h2{font-size:13px;font-weight:700}.sec-cnt{font-family:'DM Mono',monospace;font-size:10px;color:var(--subtle)}
 .ml-auto{margin-left:auto}
-.btn{font-family:'DM Mono',monospace;font-size:10px;padding:6px 14px;border:1px solid var(--line);border-radius:6px;background:var(--gold);color:#fff;text-decoration:none;display:inline-block}
+.btn{font-family:'DM Mono',monospace;font-size:10px;padding:6px 14px;border-radius:6px;background:var(--gold);color:#fff;text-decoration:none;display:inline-block}
 .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:24px}
 table{width:100%;border-collapse:collapse}
 thead th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--subtle);text-transform:uppercase;padding:9px 20px;text-align:left;background:var(--bg);border-bottom:1px solid var(--line);white-space:nowrap}
-tbody tr{transition:background .1s}
-tbody tr:hover{background:var(--gold-pale)}
+tbody tr{transition:background .1s}tbody tr:hover{background:var(--gold-pale)}
 tbody tr:not(:last-child){border-bottom:1px solid var(--line)}
 tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
 .firm-name{font-weight:700;font-size:12px}
-.mono{font-family:'DM Mono',monospace}
-.micro{font-size:9px}.small{font-size:11px}.subtle{color:var(--subtle)}
-.tag{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-family:'DM Mono',monospace;font-size:9px;font-weight:500}
-.tag-ok{background:var(--green-pale);color:var(--green)}
-.tag-warn{background:#fff3cd;color:#7a5c00}
-.tag-bad{background:var(--red-pale);color:var(--red)}
+.mono{font-family:'DM Mono',monospace}.micro{font-size:9px}.small{font-size:11px}.subtle{color:var(--subtle)}
 .score-dot{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-family:'DM Mono',monospace;font-size:10px;font-weight:500}
-.score-high{background:var(--green-pale);color:var(--green)}
-.score-mid{background:var(--gold-pale);color:#7a5c00}
-.score-low{background:var(--red-pale);color:var(--red)}
-.blist{list-style:none;margin-top:12px}
-.bitem{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px}
-.bitem:last-child{border:none}
-.bcolor{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-.bname{flex:1;font-weight:600}
-.bcnt,.bpct{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
+.score-high{background:var(--green-pale);color:var(--green)}.score-mid{background:var(--gold-pale);color:#7a5c00}.score-low{background:var(--red-pale);color:var(--red)}
+.blist{list-style:none;margin-top:12px}.bitem{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px}
+.bitem:last-child{border:none}.bcolor{width:9px;height:9px;border-radius:2px;flex-shrink:0}.bname{flex:1;font-weight:600}.bcnt{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}
 .fnote{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);text-align:center;padding:20px 0 4px;border-top:1px solid var(--line);margin-top:8px;line-height:1.8}
 </style>
 </head>
@@ -89,51 +72,449 @@ tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
 </aside>
 <main class="main">
   <div class="topbar">
-    <div>
-      <div class="topbar-t">MFOs &amp; Gestores de Patrimônio — Brasil</div>
-      <div class="topbar-m">Cadastro CVM · Ref. 23/03/2026 17:47</div>
-    </div>
-    <span class="updated">⬤ Atualizado 23/03/2026 17:47</span>
+    <div><div class="topbar-t">MFOs &amp; Gestores de Patrimônio — Brasil</div>
+    <div class="topbar-m">Cadastro CVM · Ref. 23/03/2026 18:18</div></div>
+    <span class="updated">⬤ Atualizado 23/03/2026 18:18</span>
   </div>
   <div class="content">
     <div class="kpi-strip">
-      <div class="kpi"><div class="kpi-l">Firmas ativas (CVM)</div><div class="kpi-v">0</div><div class="kpi-d">Adm. carteira + Consultores</div></div>
-      <div class="kpi"><div class="kpi-l">MFOs identificados</div><div class="kpi-v">0</div><div class="kpi-d">Heurística multicritério</div></div>
+      <div class="kpi"><div class="kpi-l">Firmas ativas (CVM)</div><div class="kpi-v">1,506</div><div class="kpi-d">Adm. carteira + Consultores</div></div>
+      <div class="kpi"><div class="kpi-l">MFOs identificados</div><div class="kpi-v">57</div><div class="kpi-d">Heurística multicritério</div></div>
       <div class="kpi"><div class="kpi-l">Alvos M&amp;A (score ≥ 7)</div><div class="kpi-v">0</div><div class="kpi-d" style="color:var(--gold)">⬤ Alta prioridade</div></div>
-      <div class="kpi"><div class="kpi-l">Novos em 2026</div><div class="kpi-v">0</div><div class="kpi-d">Registros no ano</div></div>
+      <div class="kpi"><div class="kpi-l">Novos em 2026</div><div class="kpi-v">21</div><div class="kpi-d">Registros no ano</div></div>
     </div>
     <div class="grid-3">
       <div class="card">
         <div class="card-t">Crescimento da indústria</div>
         <div class="card-sub">Registros ativos por ano · CVM</div>
-        <div class="ch" style="height:180px"><canvas id="growthChart"></canvas></div>
+        <div style="height:180px"><canvas id="growthChart"></canvas></div>
       </div>
       <div class="card">
         <div class="card-t">Perfil do universo</div>
-        <div class="card-sub">Por tipo de gestão</div>
-        <div class="ch" style="height:110px"><canvas id="typeChart"></canvas></div>
-        <ul class="blist"></ul>
+        <div class="card-sub">Por classificação</div>
+        <div style="height:110px"><canvas id="typeChart"></canvas></div>
+        <ul class="blist"><li class="bitem"><span class="bcolor" style="background:#b8965a"></span><span class="bname">Outro</span><span class="bcnt">1449</span></li><li class="bitem"><span class="bcolor" style="background:#1a3a6b"></span><span class="bname">MFO/Wealth Management</span><span class="bcnt">57</span></li></ul>
       </div>
       <div class="card">
         <div class="card-t">Concentração por UF</div>
         <div class="card-sub">Top estados · MFOs</div>
-        <div class="ch" style="height:180px"><canvas id="stateChart"></canvas></div>
+        <div style="height:180px"><canvas id="stateChart"></canvas></div>
       </div>
     </div>
     <div class="sec-hd">
       <h2>Ranking MFOs — Score M&amp;A</h2>
-      <span class="sec-cnt">Top 50 de 0 identificados</span>
-      <div class="ml-auto"><a href="mfos.csv" class="btn">↓ CSV completo (0 firmas)</a></div>
+      <span class="sec-cnt">Top 50 de 57 identificados</span>
+      <div class="ml-auto"><a href="mfos.csv" class="btn">↓ CSV completo (57 firmas)</a></div>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>Sanções</th><th>Score M&A</th><th>Contato</th></tr></thead>
-        <tbody></tbody>
+        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>PL Gestora</th><th>Score M&A</th><th>Contato</th></tr></thead>
+        <tbody><tr>
+          <td><span class="mono subtle">01</span></td>
+          <td><div class="firm-name">Igf Wealth Management Ltda</div><div class="mono micro subtle">03.282.508/0001-18</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">1999</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">R$ 1.1M</span></td>
+          <td><span class="score-dot score-mid">6.5</span></td>
+          <td><a href="mailto:contato@igfwm.com" style="color:var(--gold);font-size:9px">contato@igfwm.com</a> <a href="http://www.fractalasset.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">02</span></td>
+          <td><div class="firm-name">Andbank Gestao De Patrimonio Financeiro Ltda</div><div class="mono micro subtle">09.664.936/0001-91</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2011</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:jose.campos@andbank.com.br" style="color:var(--gold);font-size:9px">jose.campos@andbank.com.br</a> <a href="www.andbank.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">03</span></td>
+          <td><div class="firm-name">Aurum Gestão De Patrimônio Ltda.</div><div class="mono micro subtle">33.534.220/0001-54</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2020</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:hugh@aurumwm.com.br" style="color:var(--gold);font-size:9px">hugh@aurumwm.com.br</a> <a href="www.aurumwm.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">04</span></td>
+          <td><div class="firm-name">Az Guidance Gestão De Patrimônio Ltda.</div><div class="mono micro subtle">16.987.291/0001-93</div></td>
+          <td><span class="mono small">RJ</span></td>
+          <td><span class="mono micro">2013</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:guidance@guidancegestora.com.br" style="color:var(--gold);font-size:9px">guidance@guidancegestora.com.b</a> <a href="www.guidance.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">05</span></td>
+          <td><div class="firm-name">B.Side Wealth Management Gestão De Recursos Ltda</div><div class="mono micro subtle">15.555.601/0001-38</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2012</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:gestao@bsideinvestimentos.com" style="color:var(--gold);font-size:9px">gestao@bsideinvestimentos.com</a> <a href="https://bsideinvestimentos.com.br/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">06</span></td>
+          <td><div class="firm-name">Basílica Partners Latin America Private Equity Ltda.</div><div class="mono micro subtle">24.979.104/0001-58</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2021</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:acbernardi@basilicapartners.com" style="color:var(--gold);font-size:9px">acbernardi@basilicapartners.co</a> <a href="www.basilicapartners.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">07</span></td>
+          <td><div class="firm-name">Fortune Gestora De Recursos Ltda.</div><div class="mono micro subtle">35.646.759/0001-20</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2021</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:contato@fortunewm.com.br" style="color:var(--gold);font-size:9px">contato@fortunewm.com.br</a> <a href="www.fortunewm.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">08</span></td>
+          <td><div class="firm-name">Effika Investimentos - Gestora De Patrimônio Ltda</div><div class="mono micro subtle">19.569.363/0001-70</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2014</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:contato@effika.com.br" style="color:var(--gold);font-size:9px">contato@effika.com.br</a> <a href="www.effika.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">09</span></td>
+          <td><div class="firm-name">Alocc Gestão Patrimonial Ltda.</div><div class="mono micro subtle">08.228.243/0001-93</div></td>
+          <td><span class="mono small">RJ</span></td>
+          <td><span class="mono micro">2011</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:notificacoes@alocc.com.br" style="color:var(--gold);font-size:9px">notificacoes@alocc.com.br</a> <a href="www.alocc.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">10</span></td>
+          <td><div class="firm-name">Ght4 Wealth Management Ltda.</div><div class="mono micro subtle">10.807.094/0001-69</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2015</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:contato@loyall.com.br" style="color:var(--gold);font-size:9px">contato@loyall.com.br</a> <a href="https://ght4.com/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">11</span></td>
+          <td><div class="firm-name">Kinea Private Equity Investimentos S/A</div><div class="mono micro subtle">04.661.817/0001-61</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2013</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:relacionamento.reguladores@itau-unibanco.com.br" style="color:var(--gold);font-size:9px">relacionamento.reguladores@ita</a> <a href="www.kinea.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">12</span></td>
+          <td><div class="firm-name">Galapagos Wealth Management Gestão De Investimentos Ltda</div><div class="mono micro subtle">11.438.570/0001-84</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2014</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:itamar.pacheco@galapagoscapital.com" style="color:var(--gold);font-size:9px">itamar.pacheco@galapagoscapita</a> <a href="www.galapagoscapital.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">13</span></td>
+          <td><div class="firm-name">Est Gestão De Patrimônio Ltda.</div><div class="mono micro subtle">08.968.113/0001-97</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2011</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:estgp@estgp.com.br" style="color:var(--gold);font-size:9px">estgp@estgp.com.br</a> <a href="www.estgp.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">14</span></td>
+          <td><div class="firm-name">Peak Wealth Advisory Gestora De Recursos Ltda.</div><div class="mono micro subtle">18.734.175/0001-98</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2014</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:rodrigo.sousa@apexw.com" style="color:var(--gold);font-size:9px">rodrigo.sousa@apexw.com</a> <a href="www.peakw.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">15</span></td>
+          <td><div class="firm-name">Prisma Private  Credit Ltda.</div><div class="mono micro subtle">36.358.004/0001-93</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2021</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:compliance@prismacapital.com" style="color:var(--gold);font-size:9px">compliance@prismacapital.com</a> <a href="https://www.prismacapital.com/realestate/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">16</span></td>
+          <td><div class="firm-name">Rbr Private Equity Gestão De Recursos Ltda.</div><div class="mono micro subtle">40.147.051/0001-65</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2021</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:legal@rbrasset.com.br" style="color:var(--gold);font-size:9px">legal@rbrasset.com.br</a> <a href="www.rbrasset.com.br/rbrprivateequity" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">17</span></td>
+          <td><div class="firm-name">Opportunity Auster Wealth Management Ltda.</div><div class="mono micro subtle">15.319.547/0001-21</div></td>
+          <td><span class="mono small">RJ</span></td>
+          <td><span class="mono micro">2012</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:atendimento@oawm.com.br" style="color:var(--gold);font-size:9px">atendimento@oawm.com.br</a> <a href="www.opportunityauster.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">18</span></td>
+          <td><div class="firm-name">Sastre Gestão De Patrimônio Ltda.</div><div class="mono micro subtle">27.222.262/0001-57</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2017</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:sastre@sastregp.com.br" style="color:var(--gold);font-size:9px">sastre@sastregp.com.br</a> <a href="www.sastregestaodepatrimonio.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">19</span></td>
+          <td><div class="firm-name">Wealth High Governance Capital Ltda.</div><div class="mono micro subtle">34.848.969/0001-39</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2020</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:whg.compliance@whg.com.br" style="color:var(--gold);font-size:9px">whg.compliance@whg.com.br</a> <a href="www.whg.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">20</span></td>
+          <td><div class="firm-name">Wealth High Governance Asset Management Ltda.</div><div class="mono micro subtle">39.563.738/0001-00</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2021</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:whg.compliance@whg.com.br" style="color:var(--gold);font-size:9px">whg.compliance@whg.com.br</a> <a href="www.whg.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">21</span></td>
+          <td><div class="firm-name">Vitra Gestão De Patrimonio Ltda</div><div class="mono micro subtle">30.406.191/0001-57</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2018</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-mid">6.0</span></td>
+          <td><a href="mailto:compliance@vitracapital.com" style="color:var(--gold);font-size:9px">compliance@vitracapital.com</a> <a href="https://vitracapital.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">22</span></td>
+          <td><div class="firm-name">Panary Consultoria E Gestão Patrimonial Ltda.</div><div class="mono micro subtle">23.992.796/0001-01</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2018</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.5</span></td>
+          <td><a href="mailto:ana@marae.net.br" style="color:var(--gold);font-size:9px">ana@marae.net.br</a> </td>
+        </tr><tr>
+          <td><span class="mono subtle">23</span></td>
+          <td><div class="firm-name">Privatto Administração De Patrimônio Ltda</div><div class="mono micro subtle">19.207.159/0001-00</div></td>
+          <td><span class="mono small">RS</span></td>
+          <td><span class="mono micro">2014</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.5</span></td>
+          <td><a href="mailto:gestor@privatto.com.br" style="color:var(--gold);font-size:9px">gestor@privatto.com.br</a> <a href="www.privatto.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">24</span></td>
+          <td><div class="firm-name">Icatu Gestão Patrimonial Ltda</div><div class="mono micro subtle">09.481.178/0001-76</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2010</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:compliance@icatugp.com.br" style="color:var(--gold);font-size:9px">compliance@icatugp.com.br</a> <a href="http://www.icatugp.com.br/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">25</span></td>
+          <td><div class="firm-name">Hsi Gestora De Real Estate Private Equity Ltda.</div><div class="mono micro subtle">42.312.440/0001-24</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2022</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:compliance@hsinvest.com" style="color:var(--gold);font-size:9px">compliance@hsinvest.com</a> <a href="www.hsinvest.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">26</span></td>
+          <td><div class="firm-name">The Fortune One - Investimentos E Gestão De Recursos Ltda.</div><div class="mono micro subtle">43.217.614/0001-32</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2022</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:institucional@thefortune.one" style="color:var(--gold);font-size:9px">institucional@thefortune.one</a> <a href="www.thefortune.one" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">27</span></td>
+          <td><div class="firm-name">Somma Multi-Family Office S.A.</div><div class="mono micro subtle">29.247.309/0001-62</div></td>
+          <td><span class="mono small">SC</span></td>
+          <td><span class="mono micro">2018</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:luiz.osorio@gruposomma.com.br" style="color:var(--gold);font-size:9px">luiz.osorio@gruposomma.com.br</a> <a href="https://www.sommainvestimentos.com.br/familias/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">28</span></td>
+          <td><div class="firm-name">Sten Gestão Patrimonial Ltda.</div><div class="mono micro subtle">06.332.955/0001-22</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2009</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:bruno.rodrigues@sten.capital" style="color:var(--gold);font-size:9px">bruno.rodrigues@sten.capital</a> <a href="https://sten.capital/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">29</span></td>
+          <td><div class="firm-name">Spx Private Equity Gestão De Recursos Ltda.</div><div class="mono micro subtle">10.632.282/0001-01</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2009</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:legal@spxcapital.com.br" style="color:var(--gold);font-size:9px">legal@spxcapital.com.br</a> <a href="https://www.spxcapital.com/pt/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">30</span></td>
+          <td><div class="firm-name">Pragma Gestão De Patrimônio Ltda</div><div class="mono micro subtle">04.920.763/0001-01</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2007</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:infos.regulatorias@pragmabr.com" style="color:var(--gold);font-size:9px">infos.regulatorias@pragmabr.co</a> <a href="www.pragmabr.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">31</span></td>
+          <td><div class="firm-name">Perfin Wealth Management Ltda.</div><div class="mono micro subtle">43.027.793/0001-45</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2022</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:compliance@perfin.com.br" style="color:var(--gold);font-size:9px">compliance@perfin.com.br</a> <a href="www.perfin.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">32</span></td>
+          <td><div class="firm-name">Monte Bravo Gestão Patrimonial Ltda.</div><div class="mono micro subtle">49.857.981/0001-87</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2023</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:contato@mbfo.com.br" style="color:var(--gold);font-size:9px">contato@mbfo.com.br</a> <a href="www.mbfamilyoffice.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">33</span></td>
+          <td><div class="firm-name">Multiplica Wealth Management Ltda.</div><div class="mono micro subtle">32.003.165/0001-03</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2022</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:tatiane.campos@grupomultiplica.com.br" style="color:var(--gold);font-size:9px">tatiane.campos@grupomultiplica</a> <a href="https://grupomultiplica.com.br/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">34</span></td>
+          <td><div class="firm-name">One Wealth Management Gestora De Recursos Ltda</div><div class="mono micro subtle">43.043.121/0001-23</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2022</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:compliance@investimentos.one" style="color:var(--gold);font-size:9px">compliance@investimentos.one</a> <a href="www.onewm.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">35</span></td>
+          <td><div class="firm-name">Galapagos Multi Family Office Ltda</div><div class="mono micro subtle">05.794.902/0001-60</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2007</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:itamar.pacheco@galapagoscapital.com" style="color:var(--gold);font-size:9px">itamar.pacheco@galapagoscapita</a> <a href="https://galapagoscapital.com/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">36</span></td>
+          <td><div class="firm-name">Tendência Wealth Management Ltda</div><div class="mono micro subtle">11.252.952/0001-19</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2010</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">5.0</span></td>
+          <td><a href="mailto:jose@asset.tendencia.com.br" style="color:var(--gold);font-size:9px">jose@asset.tendencia.com.br</a> <a href="www.tendencia.com.br/03.html" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">37</span></td>
+          <td><div class="firm-name">Arandu Wm Gestora De Patrimônio Ltda</div><div class="mono micro subtle">05.119.639/0001-04</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2002</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:juridico@arandupartners.com.br" style="color:var(--gold);font-size:9px">juridico@arandupartners.com.br</a> <a href="www.reag.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">38</span></td>
+          <td><div class="firm-name">Future E Legacy Multi Family Office Gestão De Recursos Ltda.</div><div class="mono micro subtle">61.095.233/0001-00</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2025</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:info@flmfo.com" style="color:var(--gold);font-size:9px">info@flmfo.com</a> <a href="www.flmfo.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">39</span></td>
+          <td><div class="firm-name">Credit Suisse Hedging-Griffo Wealth Management S.A.</div><div class="mono micro subtle">68.328.632/0001-12</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">1997</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:ol-brazil-governance@ubs.com" style="color:var(--gold);font-size:9px">ol-brazil-governance@ubs.com</a> <a href="https://br.credit-suisse.com/site/index.seam" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">40</span></td>
+          <td><div class="firm-name">Azimut Brasil Wealth Management Ltda</div><div class="mono micro subtle">03.829.051/0001-19</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2000</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:leonardo.monoli@azimutwealth.com.br" style="color:var(--gold);font-size:9px">leonardo.monoli@azimutwealth.c</a> <a href="www.azimutwealth.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">41</span></td>
+          <td><div class="firm-name">Café Consultoria E Gestão De Patrimônio Ltda</div><div class="mono micro subtle">50.884.578/0001-26</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2024</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:mariana@cafeinvest.com.br" style="color:var(--gold);font-size:9px">mariana@cafeinvest.com.br</a> <a href="www.cafeinvest.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">42</span></td>
+          <td><div class="firm-name">Qlz Wm Gestão De Patrimônios Ltda.</div><div class="mono micro subtle">54.558.360/0001-32</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2024</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:affonsoneto@qlzwm.com.br" style="color:var(--gold);font-size:9px">affonsoneto@qlzwm.com.br</a> <a href="www.qlzwm.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">43</span></td>
+          <td><div class="firm-name">Jc Wealth Gestão Integral De Patrimônio Ltda.</div><div class="mono micro subtle">32.877.398/0001-35</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2024</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:compliance@journeycapital.com.br" style="color:var(--gold);font-size:9px">compliance@journeycapital.com.</a> <a href="www.journeycapital.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">44</span></td>
+          <td><div class="firm-name">Guará Multi Family Office Gestora De Recursos Ltda</div><div class="mono micro subtle">45.660.027/0001-49</div></td>
+          <td><span class="mono small">RS</span></td>
+          <td><span class="mono micro">2022</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:frederico@guaramfo.com.br" style="color:var(--gold);font-size:9px">frederico@guaramfo.com.br</a> <a href="www.guaramfo.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">45</span></td>
+          <td><div class="firm-name">Gamut Gestão Patrimonial Ltda.</div><div class="mono micro subtle">49.001.178/0001-46</div></td>
+          <td><span class="mono small">RJ</span></td>
+          <td><span class="mono micro">2024</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:antonio.machado@gamutgp.com.br" style="color:var(--gold);font-size:9px">antonio.machado@gamutgp.com.br</a> <a href="https://gamutgp.com.br/" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">46</span></td>
+          <td><div class="firm-name">Neo Private Equity Gestao De Recursos Ltda</div><div class="mono micro subtle">05.640.380/0001-42</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2003</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:compliance@neo.com.br" style="color:var(--gold);font-size:9px">compliance@neo.com.br</a> <a href="www.neo.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">47</span></td>
+          <td><div class="firm-name">Prisma Private Equity Ltda.</div><div class="mono micro subtle">53.184.854/0001-31</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2024</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:compliance@prismacapital.com" style="color:var(--gold);font-size:9px">compliance@prismacapital.com</a> <a href="www.prismacapital.com" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">48</span></td>
+          <td><div class="firm-name">Op Consultoria E Gestão Patrimonial Ltda.</div><div class="mono micro subtle">26.207.537/0001-10</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2024</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:contato@opfinance.com.br" style="color:var(--gold);font-size:9px">contato@opfinance.com.br</a> <a href="www.opfinance.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">49</span></td>
+          <td><div class="firm-name">Opportunity Private Equity Gestora De Recursos Ltda</div><div class="mono micro subtle">03.151.030/0001-97</div></td>
+          <td><span class="mono small">RJ</span></td>
+          <td><span class="mono micro">1999</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:gar@opportunity.com.br" style="color:var(--gold);font-size:9px">gar@opportunity.com.br</a> <a href="opportunity.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr><tr>
+          <td><span class="mono subtle">50</span></td>
+          <td><div class="firm-name">Vos Gestão De Patrimônio Ltda.</div><div class="mono micro subtle">58.450.445/0001-53</div></td>
+          <td><span class="mono small">SP</span></td>
+          <td><span class="mono micro">2025</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">—</span></td>
+          <td><span class="score-dot score-low">4.5</span></td>
+          <td><a href="mailto:contato@vosinvestimentos.com.br" style="color:var(--gold);font-size:9px">contato@vosinvestimentos.com.b</a> <a href="www.vosinvestimentos.com.br" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a></td>
+        </tr></tbody>
       </table>
     </div>
     <div class="fnote">
-      Fonte: CVM Dados Abertos (dados.cvm.gov.br) · Atualização automática via GitHub Actions · 23/03/2026 17:47<br>
-      MFOs identificados por heurística: nome social + tipo de gestão. Score M&A: modelo 0–10.<br>
+      Fonte: CVM Dados Abertos (dados.cvm.gov.br) · Atualização automática via GitHub Actions · 23/03/2026 18:18<br>
+      MFOs identificados por heurística: nome social + categoria CVM. Score M&A: modelo 0–10.<br>
       Este dashboard não constitui recomendação de investimento.
     </div>
   </div>
@@ -141,9 +522,8 @@ tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
 </div>
 <script>
 const mono="'DM Mono',monospace",gold="#b8965a",lineC="#e0ddd8",ink="#0d0d0d";
-new Chart(document.getElementById('growthChart'),{type:'line',data:{labels:[],datasets:[{label:'Registros',data:[],borderColor:ink,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa',maxTicksLimit:8}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa'}}}}});
-new Chart(document.getElementById('typeChart'),{type:'doughnut',data:{labels:[],datasets:[{data:[],backgroundColor:['#b8965a','#1a3a6b','#4a2d7a','#2d6a4f','#888'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
-new Chart(document.getElementById('stateChart'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:gold+'cc',borderWidth:0,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:mono,size:9},color:'#aaa'}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:9},color:'#aaa'}}}}});
+new Chart(document.getElementById('growthChart'),{type:'line',data:{labels:["1989", "1990", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],datasets:[{label:'Registros',data:[3, 8, 6, 2, 4, 6, 1, 9, 6, 9, 9, 11, 7, 23, 18, 22, 28, 45, 43, 41, 54, 66, 55, 70, 41, 52, 27, 43, 62, 50, 72, 144, 128, 104, 104, 112, 21],borderColor:ink,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa',maxTicksLimit:8}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa'}}}}});
+new Chart(document.getElementById('typeChart'),{type:'doughnut',data:{labels:["Outro", "MFO/Wealth Management"],datasets:[{data:[1449, 57],backgroundColor:['#b8965a','#1a3a6b','#4a2d7a'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('stateChart'),{type:'bar',data:{labels:["SP", "RJ", "RS", "SC", "GO"],datasets:[{data:[47, 6, 2, 1, 1],backgroundColor:gold+'cc',borderWidth:0,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:mono,size:9},color:'#aaa'}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:9},color:'#aaa'}}}}});
 </script>
-</body>
-</html>
+</body></html>
