@@ -13,10 +13,34 @@ DOCS_DIR.mkdir(exist_ok=True)
 CVM_ADM_URL    = "https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.zip"
 CVM_CONSUL_URL = "https://dados.cvm.gov.br/dados/CONSUL_VALOR/CAD/DADOS/cad_consul_val.zip"
 
+# Keywords genéricas para identificar MFOs por tipo
 MFO_KEYWORDS = [
-    "family office","family","patrimônio","patrimonio","wealth","familiar",
-    "multifamily","multi-family","gestão patrimonial","gestao patrimonial",
-    "private wealth","private","fortune","multi family",
+    "family office", "family", "patrimônio", "patrimonio", "wealth",
+    "familiar", "multifamily", "multi-family", "gestão patrimonial",
+    "gestao patrimonial", "private wealth", "private", "fortune",
+    "multi family", "mfo",
+]
+
+# Lista curada de MFOs conhecidos (nomes parciais em lowercase)
+KNOWN_MFOS = [
+    "1618", "051 capital", "adduntia", "aeternus", "amb family",
+    "aqua wealth", "aram capital", "arbitral", "attimo", "aware",
+    "azimut", "bevas", "bnr family", "brasil wm", "capital advisors",
+    "capri family", "carpa family", "centuria", "cimo family",
+    "consist mfo", "criteria", "ekho", "eleva invest", "enseada family",
+    "ethos investimentos", "etrnty", "fd international", "g5 partners",
+    "galacticos", "genesis", "ghia", "grupo independiente",
+    "gutierrez group", "hieron", "horizonte mx", "ibbra", "incipio",
+    "investport", "jera capital", "legend", "lombard odier", "lxg family",
+    "mandatto", "setta", "mercury", "mfo advisors", "milenium family",
+    "misti capital", "moma family", "naopim", "nau capital", "oikos",
+    "orion advisors", "oriz partners", "patagonia capital", "perfin",
+    "portofino", "portogallo", "pragma", "privatto", "promecap",
+    "sastre", "seven pounds", "sg mfo", "sonata", "sow capital",
+    "sten capital", "sten gestão", "taler gestão", "tempus asset",
+    "tera capital", "trafalgar", "troon capital", "turim",
+    "veneto family", "vokin", "we capital", "whg", "wisdom family",
+    "wright", "vitra", "ventura",
 ]
 
 def fetch_zip(url, label):
@@ -41,7 +65,13 @@ def read_csv_from_zip(z, filename):
 
 def is_mfo(nome):
     nome_lower = nome.lower()
-    return any(kw in nome_lower for kw in MFO_KEYWORDS)
+    # Checa keywords genéricas
+    if any(kw in nome_lower for kw in MFO_KEYWORDS):
+        return True
+    # Checa lista curada de MFOs conhecidos
+    if any(kw in nome_lower for kw in KNOWN_MFOS):
+        return True
+    return False
 
 def main():
     print("=== MFO Brasil Dashboard Builder ===")
