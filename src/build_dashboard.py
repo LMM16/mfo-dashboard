@@ -17,9 +17,24 @@ from pathlib import Path
 DOCS_DIR = Path(__file__).parent.parent / "docs"
 DOCS_DIR.mkdir(exist_ok=True)
 
-CVM_ADM_URL    = "https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.csv"
-CVM_CONSUL_URL = "https://dados.cvm.gov.br/dados/CONSUL_VALOR/CAD/DADOS/cad_consul_val.csv"
-CVM_PAS_URL    = "https://dados.cvm.gov.br/dados/PAS/DADOS/pas.csv"
+# URLs CVM Dados Abertos — verificadas em Mar/2026
+# Administradores de carteira (gestor de recursos + patrimônio)
+CVM_ADM_URLS = [
+    "https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.csv",
+    "https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart_pj.csv",
+    "https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart_pf.csv",
+]
+# Consultores de valores mobiliários
+CVM_CONSUL_URLS = [
+    "https://dados.cvm.gov.br/dados/CONSUL_VALOR/CAD/DADOS/cad_consul_val.csv",
+    "https://dados.cvm.gov.br/dados/CONSUL_VALOR/CAD/DADOS/cad_consul_val_pj.csv",
+    "https://dados.cvm.gov.br/dados/CONSUL_VALOR/CAD/DADOS/cad_consul_val_pf.csv",
+]
+# Processos sancionadores
+CVM_PAS_URLS = [
+    "https://dados.cvm.gov.br/dados/PAS/DADOS/pas_adm_responsavel.csv",
+    "https://dados.cvm.gov.br/dados/PAS/DADOS/pas.csv",
+]
 
 # Palavras-chave para identificar MFOs no nome social
 MFO_KEYWORDS = [
@@ -209,9 +224,18 @@ def main():
     print(f"Data de referência: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
 
     print("1. Coletando dados da CVM...")
-    df_adm_raw    = fetch_csv(CVM_ADM_URL,    "Administradores de Carteira")
-    df_consul_raw = fetch_csv(CVM_CONSUL_URL, "Consultores de Valores Mobiliários")
-    df_pas_raw    = fetch_csv(CVM_PAS_URL,    "Processos Sancionadores")
+
+    def fetch_first(urls, label):
+        for url in urls:
+            df = fetch_csv(url, label)
+            if not df.empty:
+                return df
+        print(f"  AVISO: nenhuma URL funcionou para {label}")
+        return pd.DataFrame()
+
+    df_adm_raw    = fetch_first(CVM_ADM_URLS,    "Administradores de Carteira")
+    df_consul_raw = fetch_first(CVM_CONSUL_URLS, "Consultores de Valores Mobiliários")
+    df_pas_raw    = fetch_first(CVM_PAS_URLS,    "Processos Sancionadores")
 
     print("\n2. Normalizando schemas...")
     df_adm    = normalize_adm(df_adm_raw)
@@ -219,11 +243,20 @@ def main():
 
     print("\n3. Consolidando universo...")
     df = pd.concat([df_adm, df_consul], ignore_index=True)
-    df = df.drop_duplicates(subset=["CNPJ_CPF"])
+    if df.empty:
+        print("   ERRO: nenhum dado coletado. Verifique as URLs da CVM.")
+        import sys; sys.exit(1)
+    # drop_duplicates só se coluna existir
+    if "CNPJ_CPF" in df.columns:
+        df = df.drop_duplicates(subset=["CNPJ_CPF"])
     print(f"   Total de registros únicos: {len(df)}")
 
-    # Apenas ativos
-    df_ativos = df[df["SITUACAO"].str.upper().str.contains("AUTORIZADO|ATIVO", na=False)].copy()
+    # Apenas ativos — coluna SITUACAO pode ter nome diferente dependendo da fonte
+    if "SITUACAO" in df.columns:
+        df_ativos = df[df["SITUACAO"].str.upper().str.contains("AUTORIZADO|ATIVO", na=False)].copy()
+    else:
+        print("   AVISO: coluna SITUACAO nao encontrada — usando todos os registros")
+        df_ativos = df.copy()
     print(f"   Ativos: {len(df_ativos)}")
 
     print("\n4. Classificando MFOs...")
