@@ -168,25 +168,30 @@ def main():
     print("\n5. Calculando scores...")
     def score(r):
         s = 0.0
+        # Tempo de registro (0-2.5 pts)
         try:
             ano = int(str(r["DT_REGISTRO"])[:4])
             anos = date.today().year - ano
-            if 5 <= anos <= 15: s += 2.0
-            elif 3 <= anos < 5 or 15 < anos <= 20: s += 1.0
-            elif anos > 0: s += 0.5
+            if 5 <= anos <= 15:    s += 2.5
+            elif anos > 15:        s += 2.0
+            elif 3 <= anos < 5:    s += 1.5
+            elif anos > 0:         s += 0.5
         except: pass
-        if r["IS_MFO"]: s += 2.0
-        if str(r["UF"]).strip().upper() in ("SP","RJ"): s += 1.0
+        # É MFO identificado (0-2.5 pts)
+        if r["IS_MFO"]: s += 2.5
+        # Localização (0-1.5 pts)
+        if str(r["UF"]).strip().upper() in ("SP","RJ"):        s += 1.5
         elif str(r["UF"]).strip().upper() in ("MG","RS","PR","DF"): s += 0.5
-        if str(r.get("EMAIL","")).strip() not in ("","nan","N/A"): s += 0.5
-        if str(r.get("SITE","")).strip() not in ("","nan","N/A"): s += 0.5
-        # PL da gestora como proxy de porte (peso 4.0)
+        # Contato disponível (0-1.5 pts)
+        if str(r.get("EMAIL","")).strip() not in ("","nan","N/A"): s += 0.75
+        if str(r.get("SITE","")).strip()  not in ("","nan","N/A"): s += 0.75
+        # PL da gestora — bônus quando disponível (0-2 pts)
         try:
             pl = float(str(r.get("PATRIM_LIQ","")).replace(",","."))
-            if pl >= 50_000_000:   s += 4.0   # >= R$50M
-            elif pl >= 10_000_000: s += 3.0   # >= R$10M
-            elif pl >= 1_000_000:  s += 2.0   # >= R$1M
-            elif pl > 0:           s += 1.0
+            if pl >= 50_000_000:   s += 2.0
+            elif pl >= 10_000_000: s += 1.5
+            elif pl >= 1_000_000:  s += 1.0
+            elif pl > 0:           s += 0.5
         except: pass
         return round(min(s, 10.0), 1)
 
@@ -202,7 +207,7 @@ def main():
 
     geo       = df_mfo["UF"].value_counts().head(10).to_dict()
     tipo_dist = df_ativos["CLASSIFICACAO"].value_counts().to_dict()
-    n_alvos   = int((df_mfo["SCORE_MA"] >= 7).sum())
+    n_alvos   = int((df_mfo["SCORE_MA"] >= 6).sum())
     n_novos   = int((df_ativos["ANO_REG"] == str(date.today().year)).sum())
 
     print("\n6. Gerando HTML...")
@@ -345,7 +350,7 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
     <div class="kpi-strip">
       <div class="kpi"><div class="kpi-l">Firmas ativas (CVM)</div><div class="kpi-v">{n_total:,}</div><div class="kpi-d">Adm. carteira + Consultores</div></div>
       <div class="kpi"><div class="kpi-l">MFOs identificados</div><div class="kpi-v">{n_mfo:,}</div><div class="kpi-d">Heurística multicritério</div></div>
-      <div class="kpi"><div class="kpi-l">Alvos M&amp;A (score ≥ 7)</div><div class="kpi-v">{n_alvos:,}</div><div class="kpi-d" style="color:var(--gold)">⬤ Alta prioridade</div></div>
+      <div class="kpi"><div class="kpi-l">Alvos M&amp;A (score ≥ 6)</div><div class="kpi-v">{n_alvos:,}</div><div class="kpi-d" style="color:var(--gold)">⬤ Alta prioridade</div></div>
       <div class="kpi"><div class="kpi-l">Novos em {date.today().year}</div><div class="kpi-v">{n_novos:,}</div><div class="kpi-d">Registros no ano</div></div>
     </div>
     <div class="grid-3">
