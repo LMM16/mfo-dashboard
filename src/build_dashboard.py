@@ -1,228 +1,211 @@
 """
 MFO Brasil — Dashboard Builder
-Baixa dados da CVM, identifica MFOs, gera HTML estático em docs/index.html
+Fonte: CVM Dados Abertos — cad_adm_cart.zip (pj + pf)
 """
-
 import pandas as pd
-import requests
-import json
-import zipfile
-import io
-import sys
+import requests, zipfile, io, json, sys
 from datetime import datetime, date
 from pathlib import Path
 
 DOCS_DIR = Path(__file__).parent.parent / "docs"
 DOCS_DIR.mkdir(exist_ok=True)
 
-# URLs corretas da CVM (arquivos ZIP)
 CVM_ADM_URL    = "https://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.zip"
 CVM_CONSUL_URL = "https://dados.cvm.gov.br/dados/CONSUL_VALOR/CAD/DADOS/cad_consul_val.zip"
-CVM_PAS_URL    = "https://dados.cvm.gov.br/dados/PAS/DADOS/pas_adm_responsavel.zip"
 
 MFO_KEYWORDS = [
-    "family office", "family", "patrimônio", "patrimonio",
-    "wealth", "familiar", "multifamily", "multi-family",
-    "gestão patrimonial", "gestao patrimonial",
-    "private wealth", "private", "fortune",
+    "family office","family","patrimônio","patrimonio","wealth","familiar",
+    "multifamily","multi-family","gestão patrimonial","gestao patrimonial",
+    "private wealth","private","fortune","multi family",
 ]
 
-def fetch_zip_csv(url: str, label: str) -> pd.DataFrame:
+def fetch_zip(url, label):
     print(f"  Baixando {label}...")
     try:
         resp = requests.get(url, timeout=60)
         resp.raise_for_status()
-        z = zipfile.ZipFile(io.BytesIO(resp.content))
-        # Pega o primeiro CSV dentro do zip
-        csv_files = [f for f in z.namelist() if f.endswith('.csv')]
-        if not csv_files:
-            print(f"    Nenhum CSV dentro do ZIP de {label}")
-            return pd.DataFrame()
-        csv_name = csv_files[0]
-        print(f"    → Lendo {csv_name}")
-        with z.open(csv_name) as f:
-            df = pd.read_csv(f, sep=";", encoding="latin-1", dtype=str)
-        df.columns = [c.strip().upper() for c in df.columns]
-        print(f"    → {len(df)} linhas | colunas: {list(df.columns[:8])}")
-        return df
+        return zipfile.ZipFile(io.BytesIO(resp.content))
     except Exception as e:
         print(f"    ERRO: {e}")
+        return None
+
+def read_csv_from_zip(z, filename):
+    try:
+        with z.open(filename) as f:
+            df = pd.read_csv(f, sep=";", encoding="latin-1", dtype=str)
+        df.columns = [c.strip().upper() for c in df.columns]
+        return df.fillna("")
+    except Exception as e:
+        print(f"    ERRO ao ler {filename}: {e}")
         return pd.DataFrame()
 
-def is_mfo(row: pd.Series) -> bool:
-    nome = str(row.get("NOME_SOCIAL", "") or "").lower()
-    tipo = str(row.get("TP_GEST", "") or row.get("CATEG_REGUL", "") or "").lower()
-    for kw in MFO_KEYWORDS:
-        if kw in nome:
-            return True
-    for t in ["patrimônio", "patrimonio", "wealth"]:
-        if t in tipo:
-            return True
-    return False
-
-def classify_firma(row: pd.Series) -> str:
-    if is_mfo(row):
-        return "MFO/Wealth Management"
-    tipo = str(row.get("TP_GEST", "") or row.get("CATEG_REGUL", "") or "").lower()
-    if "gestor" in tipo or "fundo" in tipo:
-        return "Gestor de Recursos"
-    return "Consultor/Outro"
-
-def normalize(df: pd.DataFrame, fonte: str) -> pd.DataFrame:
-    if df.empty:
-        return df
-    col_map = {
-        "NOME_SOCIAL": ["NOME_SOCIAL", "NOME", "DENOM_SOCIAL"],
-        "CNPJ_CPF":   ["CNPJ_CPF", "CNPJ", "CPF_CNPJ"],
-        "SITUACAO":   ["SITUACAO", "SIT"],
-        "DT_REGISTRO":["DT_REGISTRO", "DT_REG", "DATA_REGISTRO", "DT_INI_SIT"],
-        "UF":         ["UF", "ESTADO"],
-        "MUNICIPIO":  ["MUNICIPIO", "CIDADE", "MUN"],
-        "TP_GEST":    ["TP_GEST", "CATEG_REGUL", "TIPO_GEST", "CATEGORIA"],
-        "EMAIL":      ["EMAIL", "EMAIL_RESP"],
-        "SITE":       ["SITE", "SITE_WEB"],
-        "TELEFONE":   ["TELEFONE", "TEL"],
-    }
-    out = {}
-    for target, candidates in col_map.items():
-        for c in candidates:
-            if c in df.columns:
-                out[target] = df[c]
-                break
-        if target not in out:
-            out[target] = ""
-    result = pd.DataFrame(out).fillna("")
-    result["FONTE"] = fonte
-    return result
-
-def build_sancoes_map(df: pd.DataFrame) -> dict:
-    if df.empty:
-        return {}
-    for col in ["CNPJ_CPF", "CPF_CNPJ", "CNPJ", "CPF"]:
-        if col in df.columns:
-            return df[col].value_counts().to_dict()
-    return {}
-
-def calc_score(row: pd.Series, sancoes_map: dict) -> float:
-    score = 0.0
-    cnpj = str(row.get("CNPJ_CPF", ""))
-    n_pas = sancoes_map.get(cnpj, 0)
-    if n_pas == 0:
-        score += 2.5
-    elif n_pas == 1:
-        score += 1.0
-    try:
-        dt_raw = str(row.get("DT_REGISTRO", ""))
-        ano = int(dt_raw[:4]) if dt_raw and len(dt_raw) >= 4 and dt_raw[:4].isdigit() else 0
-        anos = date.today().year - ano if ano > 2000 else 0
-        if 5 <= anos <= 15:
-            score += 2.5
-        elif 3 <= anos < 5 or 15 < anos <= 20:
-            score += 1.5
-        elif anos > 0:
-            score += 0.5
-    except Exception:
-        pass
-    if row.get("CLASSIFICACAO") == "MFO/Wealth Management":
-        score += 2.0
-    uf = str(row.get("UF", "")).strip().upper()
-    if uf in ("SP", "RJ"):
-        score += 1.0
-    elif uf in ("MG", "RS", "PR", "DF"):
-        score += 0.5
-    if str(row.get("SITE", "")).strip() not in ("", "nan", "N/A"):
-        score += 0.5
-    if str(row.get("EMAIL", "")).strip() not in ("", "nan", "N/A"):
-        score += 0.5
-    return round(min(score, 10.0), 1)
+def is_mfo(nome):
+    nome_lower = nome.lower()
+    return any(kw in nome_lower for kw in MFO_KEYWORDS)
 
 def main():
     print("=== MFO Brasil Dashboard Builder ===")
     print(f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M')}\n")
 
-    print("1. Coletando dados da CVM...")
-    df_adm_raw    = fetch_zip_csv(CVM_ADM_URL,    "Administradores de Carteira")
-    df_consul_raw = fetch_zip_csv(CVM_CONSUL_URL, "Consultores de Valores Mobiliários")
-    df_pas_raw    = fetch_zip_csv(CVM_PAS_URL,    "Processos Sancionadores")
+    # ── Administradores PJ (firmas) ───────────────────
+    print("1. Coletando administradores de carteira (PJ)...")
+    z_adm = fetch_zip(CVM_ADM_URL, "ADM_CART")
+    df_pj = pd.DataFrame()
+    if z_adm:
+        print(f"   Arquivos no ZIP: {z_adm.namelist()}")
+        df_pj = read_csv_from_zip(z_adm, "cad_adm_cart_pj.csv")
+        print(f"   PJ: {len(df_pj)} linhas | colunas: {list(df_pj.columns)}")
 
-    print("\n2. Normalizando...")
-    df_adm    = normalize(df_adm_raw,    "ADM_CART")
-    df_consul = normalize(df_consul_raw, "CONSUL_VALOR")
+    # ── Consultores PJ ────────────────────────────────
+    print("\n2. Coletando consultores de valores mobiliários...")
+    z_consul = fetch_zip(CVM_CONSUL_URL, "CONSUL_VALOR")
+    df_consul = pd.DataFrame()
+    if z_consul:
+        print(f"   Arquivos no ZIP: {z_consul.namelist()}")
+        # tenta pj primeiro, depois o primeiro csv disponível
+        csv_files = [f for f in z_consul.namelist() if f.endswith('.csv')]
+        for fname in csv_files:
+            if 'pj' in fname.lower():
+                df_consul = read_csv_from_zip(z_consul, fname)
+                print(f"   Lido {fname}: {len(df_consul)} linhas")
+                break
+        if df_consul.empty and csv_files:
+            df_consul = read_csv_from_zip(z_consul, csv_files[0])
+            print(f"   Lido {csv_files[0]}: {len(df_consul)} linhas")
 
-    print("\n3. Consolidando...")
-    frames = [f for f in [df_adm, df_consul] if not f.empty]
-    if not frames:
-        print("ERRO: nenhum dado coletado.")
+    # ── Normalizar PJ admins ──────────────────────────
+    print("\n3. Normalizando...")
+    rows = []
+    for _, r in df_pj.iterrows():
+        nome   = str(r.get("DENOM_SOCIAL","") or r.get("DENOM_COMERC","")).strip()
+        cnpj   = str(r.get("CNPJ","")).strip()
+        sit    = str(r.get("SIT","")).strip()
+        dt_reg = str(r.get("DT_REG","")).strip()
+        uf     = str(r.get("UF","")).strip()
+        categ  = str(r.get("CATEG_REG","")).strip()
+        email  = str(r.get("EMAIL","")).strip()
+        site   = str(r.get("SITE_ADMIN","")).strip()
+        patrim = str(r.get("VL_PATRIM_LIQ","")).strip()
+        rows.append(dict(
+            NOME_SOCIAL=nome, CNPJ_CPF=cnpj, SITUACAO=sit,
+            DT_REGISTRO=dt_reg, UF=uf, CATEG_REG=categ,
+            EMAIL=email, SITE=site, PATRIM_LIQ=patrim, FONTE="ADM_PJ"
+        ))
+
+    # normalizar consultores se tiver colunas compatíveis
+    if not df_consul.empty:
+        col_nome = next((c for c in ["DENOM_SOCIAL","NOME","NOME_SOCIAL"] if c in df_consul.columns), None)
+        col_cnpj = next((c for c in ["CNPJ","CNPJ_CPF"] if c in df_consul.columns), None)
+        col_sit  = next((c for c in ["SIT","SITUACAO"] if c in df_consul.columns), None)
+        col_uf   = next((c for c in ["UF","ESTADO"] if c in df_consul.columns), None)
+        col_dt   = next((c for c in ["DT_REG","DT_REGISTRO"] if c in df_consul.columns), None)
+        if col_nome and col_cnpj:
+            for _, r in df_consul.iterrows():
+                rows.append(dict(
+                    NOME_SOCIAL=str(r.get(col_nome,"")).strip(),
+                    CNPJ_CPF=str(r.get(col_cnpj,"")).strip(),
+                    SITUACAO=str(r.get(col_sit,"")).strip() if col_sit else "",
+                    DT_REGISTRO=str(r.get(col_dt,"")).strip() if col_dt else "",
+                    UF=str(r.get(col_uf,"")).strip() if col_uf else "",
+                    CATEG_REG="", EMAIL="", SITE="", PATRIM_LIQ="", FONTE="CONSUL"
+                ))
+
+    df = pd.DataFrame(rows)
+    if df.empty:
+        print("ERRO: nenhum dado.")
         sys.exit(1)
-    df = pd.concat(frames, ignore_index=True)
-    if "CNPJ_CPF" in df.columns:
-        df = df.drop_duplicates(subset=["CNPJ_CPF"])
+
+    df = df.drop_duplicates(subset=["CNPJ_CPF"])
     print(f"   Total único: {len(df)}")
 
-    if "SITUACAO" in df.columns:
-        df_ativos = df[df["SITUACAO"].str.upper().str.contains("AUTORIZADO|ATIVO", na=False)].copy()
-    else:
-        print("   AVISO: coluna SITUACAO ausente — usando todos")
+    # Ativos
+    df_ativos = df[df["SITUACAO"].str.upper().str.contains("FUNCIONAMENTO|AUTORIZADO|ATIVO", na=False)].copy()
+    if df_ativos.empty:
+        print("   AVISO: filtro de situação não encontrou ativos — usando todos")
         df_ativos = df.copy()
     print(f"   Ativos: {len(df_ativos)}")
 
-    print("\n4. Classificando MFOs...")
-    df_ativos["CLASSIFICACAO"] = df_ativos.apply(classify_firma, axis=1)
-    n_mfo = (df_ativos["CLASSIFICACAO"] == "MFO/Wealth Management").sum()
-    print(f"   MFOs: {n_mfo}")
+    # ── Classificar MFOs ──────────────────────────────
+    print("\n4. Identificando MFOs...")
+    df_ativos["IS_MFO"] = df_ativos["NOME_SOCIAL"].apply(is_mfo)
+    # também marca se categoria contiver patrimônio
+    df_ativos["IS_MFO"] = df_ativos["IS_MFO"] | df_ativos["CATEG_REG"].str.lower().str.contains("patrimônio|patrimonio|wealth", na=False)
+    df_ativos["CLASSIFICACAO"] = df_ativos["IS_MFO"].map({True:"MFO/Wealth Management", False:"Outro"})
+    n_mfo = df_ativos["IS_MFO"].sum()
+    print(f"   MFOs identificados: {n_mfo}")
 
-    print("\n5. Scores M&A...")
-    sancoes_map = build_sancoes_map(df_pas_raw)
-    df_ativos["SCORE_MA"] = df_ativos.apply(lambda r: calc_score(r, sancoes_map), axis=1)
-    df_ativos["N_SANCOES"] = df_ativos["CNPJ_CPF"].map(sancoes_map).fillna(0).astype(int)
+    # ── Score M&A ─────────────────────────────────────
+    print("\n5. Calculando scores...")
+    def score(r):
+        s = 0.0
+        try:
+            ano = int(str(r["DT_REGISTRO"])[:4])
+            anos = date.today().year - ano
+            if 5 <= anos <= 15: s += 2.5
+            elif 3 <= anos < 5 or 15 < anos <= 20: s += 1.5
+            elif anos > 0: s += 0.5
+        except: pass
+        if r["IS_MFO"]: s += 2.5
+        if str(r["UF"]).strip().upper() in ("SP","RJ"): s += 1.5
+        elif str(r["UF"]).strip().upper() in ("MG","RS","PR","DF"): s += 0.5
+        if str(r.get("EMAIL","")).strip() not in ("","nan","N/A"): s += 1.0
+        if str(r.get("SITE","")).strip() not in ("","nan","N/A"): s += 0.5
+        try:
+            pl = float(str(r.get("PATRIM_LIQ","")).replace(",","."))
+            if pl > 0: s += 2.0
+        except: pass
+        return round(min(s, 10.0), 1)
 
-    df_mfo = df_ativos[df_ativos["CLASSIFICACAO"] == "MFO/Wealth Management"].copy()
-    df_mfo = df_mfo.sort_values("SCORE_MA", ascending=False).reset_index(drop=True)
+    df_ativos["SCORE_MA"] = df_ativos.apply(score, axis=1)
+    df_mfo = df_ativos[df_ativos["IS_MFO"]].sort_values("SCORE_MA", ascending=False).reset_index(drop=True)
 
-    # Evolução histórica
+    # Evolução
     df_ativos["ANO_REG"] = df_ativos["DT_REGISTRO"].str[:4]
-    evolucao = df_ativos.groupby("ANO_REG").size().reset_index(name="count")
-    evolucao = evolucao[evolucao["ANO_REG"].str.match(r"^\d{4}$")].sort_values("ANO_REG")
+    evolucao = (df_ativos.groupby("ANO_REG").size()
+                .reset_index(name="count")
+                .pipe(lambda d: d[d["ANO_REG"].str.match(r"^\d{4}$")])
+                .sort_values("ANO_REG"))
 
     geo       = df_mfo["UF"].value_counts().head(10).to_dict()
     tipo_dist = df_ativos["CLASSIFICACAO"].value_counts().to_dict()
+    n_alvos   = int((df_mfo["SCORE_MA"] >= 7).sum())
+    n_novos   = int((df_ativos["ANO_REG"] == str(date.today().year)).sum())
 
     print("\n6. Gerando HTML...")
-    html = build_html(df_mfo, df_ativos, evolucao, geo, tipo_dist)
+    html = build_html(df_mfo, df_ativos, evolucao, geo, tipo_dist, n_alvos, n_novos)
     (DOCS_DIR / "index.html").write_text(html, encoding="utf-8")
     df_mfo.to_csv(DOCS_DIR / "mfos.csv", index=False, encoding="utf-8-sig")
+    print(f"   MFOs no CSV: {len(df_mfo)}")
     print("=== Concluído! ===")
 
-def build_html(df_mfo, df_all, evolucao, geo, tipo_dist):
+def build_html(df_mfo, df_all, evolucao, geo, tipo_dist, n_alvos, n_novos):
     now     = datetime.now().strftime("%d/%m/%Y %H:%M")
     n_total = len(df_all)
     n_mfo   = len(df_mfo)
-    n_alvos = int((df_mfo["SCORE_MA"] >= 7).sum())
-    n_novos = int((df_all["DT_REGISTRO"].str[:4] == str(date.today().year)).sum())
 
     rows = ""
     for i, (_, r) in enumerate(df_mfo.head(50).iterrows(), 1):
         score = r["SCORE_MA"]
         sc    = "score-high" if score >= 8 else ("score-mid" if score >= 6 else "score-low")
-        n_pas = r["N_SANCOES"]
-        san   = ('<span class="tag tag-ok">Nenhuma</span>' if n_pas == 0
-                 else f'<span class="tag tag-warn">{n_pas} PAS</span>' if n_pas == 1
-                 else f'<span class="tag tag-bad">{n_pas} PAS</span>')
         ano   = str(r.get("DT_REGISTRO",""))[:4] or "—"
         uf    = str(r.get("UF","")).strip() or "—"
         cnpj  = str(r.get("CNPJ_CPF","")).strip()
         nome  = str(r.get("NOME_SOCIAL","")).strip().title() or "—"
         email = str(r.get("EMAIL","")).strip()
-        em_html = (f'<a href="mailto:{email}" style="color:var(--gold);font-size:9px">{email[:26]}</a>'
-                   if email and email not in ("nan","N/A","") else '<span style="color:var(--subtle)">—</span>')
+        site  = str(r.get("SITE","")).strip()
+        categ = str(r.get("CATEG_REG","")).strip()
+        em_html = (f'<a href="mailto:{email}" style="color:var(--gold);font-size:9px">{email[:30]}</a>'
+                   if email and email not in ("nan","N/A","") else "—")
+        site_html = (f'<a href="{site}" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a>'
+                     if site and site not in ("nan","N/A","") else "")
         rows += f"""<tr>
           <td><span class="mono subtle">{i:02d}</span></td>
           <td><div class="firm-name">{nome}</div><div class="mono micro subtle">{cnpj}</div></td>
           <td><span class="mono small">{uf}</span></td>
           <td><span class="mono micro">{ano}</span></td>
-          <td>{san}</td>
+          <td><span class="mono micro" style="color:var(--muted)">{categ[:30]}</span></td>
           <td><span class="score-dot {sc}">{score}</span></td>
-          <td>{em_html}</td>
+          <td>{em_html} {site_html}</td>
         </tr>"""
 
     anos_evo   = json.dumps(evolucao["ANO_REG"].tolist())
@@ -235,13 +218,12 @@ def build_html(df_mfo, df_all, evolucao, geo, tipo_dist):
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MFO Brasil — Inteligência de Mercado</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{{--ink:#0d0d0d;--muted:#5a5a5a;--subtle:#a0a0a0;--line:#e0ddd8;--bg:#f5f3ee;--card:#fdfcfa;--gold:#b8965a;--gold-pale:#f5eed9;--green:#2d6a4f;--green-pale:#d8ede2;--red:#9b2335;--red-pale:#f5dde0;--blue:#1a3a6b;--blue-pale:#dae3f5}}
+:root{{--ink:#0d0d0d;--muted:#5a5a5a;--subtle:#a0a0a0;--line:#e0ddd8;--bg:#f5f3ee;--card:#fdfcfa;--gold:#b8965a;--gold-pale:#f5eed9;--green:#2d6a4f;--green-pale:#d8ede2;--red:#9b2335;--red-pale:#f5dde0;--blue:#1a3a6b}}
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}}
 .shell{{display:grid;grid-template-columns:210px 1fr;min-height:100vh}}
@@ -259,8 +241,7 @@ body{{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-he
 .dot{{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;vertical-align:middle}}
 .main{{overflow-y:auto}}
 .topbar{{background:var(--card);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}}
-.topbar-t{{font-size:14px;font-weight:700}}
-.topbar-m{{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-top:2px}}
+.topbar-t{{font-size:14px;font-weight:700}}.topbar-m{{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-top:2px}}
 .updated{{font-family:'DM Mono',monospace;font-size:9px;background:var(--green-pale);color:var(--green);padding:4px 10px;border-radius:20px}}
 .content{{padding:24px 28px}}
 .kpi-strip{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}}
@@ -270,38 +251,23 @@ body{{font-family:'Syne',sans-serif;background:var(--bg);color:var(--ink);min-he
 .kpi-d{{font-family:'DM Mono',monospace;font-size:10px;margin-top:5px;color:var(--green)}}
 .grid-3{{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:24px}}
 .card{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px 22px}}
-.card-t{{font-size:12px;font-weight:700;margin-bottom:4px}}
-.card-sub{{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-bottom:16px}}
-.ch{{position:relative}}
+.card-t{{font-size:12px;font-weight:700;margin-bottom:4px}}.card-sub{{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);margin-bottom:16px}}
 .sec-hd{{display:flex;align-items:center;gap:10px;margin-bottom:14px}}
-.sec-hd h2{{font-size:13px;font-weight:700}}
-.sec-cnt{{font-family:'DM Mono',monospace;font-size:10px;color:var(--subtle)}}
+.sec-hd h2{{font-size:13px;font-weight:700}}.sec-cnt{{font-family:'DM Mono',monospace;font-size:10px;color:var(--subtle)}}
 .ml-auto{{margin-left:auto}}
-.btn{{font-family:'DM Mono',monospace;font-size:10px;padding:6px 14px;border:1px solid var(--line);border-radius:6px;background:var(--gold);color:#fff;text-decoration:none;display:inline-block}}
+.btn{{font-family:'DM Mono',monospace;font-size:10px;padding:6px 14px;border-radius:6px;background:var(--gold);color:#fff;text-decoration:none;display:inline-block}}
 .table-wrap{{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:24px}}
 table{{width:100%;border-collapse:collapse}}
 thead th{{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--subtle);text-transform:uppercase;padding:9px 20px;text-align:left;background:var(--bg);border-bottom:1px solid var(--line);white-space:nowrap}}
-tbody tr{{transition:background .1s}}
-tbody tr:hover{{background:var(--gold-pale)}}
+tbody tr{{transition:background .1s}}tbody tr:hover{{background:var(--gold-pale)}}
 tbody tr:not(:last-child){{border-bottom:1px solid var(--line)}}
 tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
 .firm-name{{font-weight:700;font-size:12px}}
-.mono{{font-family:'DM Mono',monospace}}
-.micro{{font-size:9px}}.small{{font-size:11px}}.subtle{{color:var(--subtle)}}
-.tag{{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-family:'DM Mono',monospace;font-size:9px;font-weight:500}}
-.tag-ok{{background:var(--green-pale);color:var(--green)}}
-.tag-warn{{background:#fff3cd;color:#7a5c00}}
-.tag-bad{{background:var(--red-pale);color:var(--red)}}
+.mono{{font-family:'DM Mono',monospace}}.micro{{font-size:9px}}.small{{font-size:11px}}.subtle{{color:var(--subtle)}}
 .score-dot{{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-family:'DM Mono',monospace;font-size:10px;font-weight:500}}
-.score-high{{background:var(--green-pale);color:var(--green)}}
-.score-mid{{background:var(--gold-pale);color:#7a5c00}}
-.score-low{{background:var(--red-pale);color:var(--red)}}
-.blist{{list-style:none;margin-top:12px}}
-.bitem{{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px}}
-.bitem:last-child{{border:none}}
-.bcolor{{width:9px;height:9px;border-radius:2px;flex-shrink:0}}
-.bname{{flex:1;font-weight:600}}
-.bcnt,.bpct{{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}}
+.score-high{{background:var(--green-pale);color:var(--green)}}.score-mid{{background:var(--gold-pale);color:#7a5c00}}.score-low{{background:var(--red-pale);color:var(--red)}}
+.blist{{list-style:none;margin-top:12px}}.bitem{{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:11px}}
+.bitem:last-child{{border:none}}.bcolor{{width:9px;height:9px;border-radius:2px;flex-shrink:0}}.bname{{flex:1;font-weight:600}}.bcnt{{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)}}
 .fnote{{font-family:'DM Mono',monospace;font-size:9px;color:var(--subtle);text-align:center;padding:20px 0 4px;border-top:1px solid var(--line);margin-top:8px;line-height:1.8}}
 </style>
 </head>
@@ -323,10 +289,8 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
 </aside>
 <main class="main">
   <div class="topbar">
-    <div>
-      <div class="topbar-t">MFOs &amp; Gestores de Patrimônio — Brasil</div>
-      <div class="topbar-m">Cadastro CVM · Ref. {now}</div>
-    </div>
+    <div><div class="topbar-t">MFOs &amp; Gestores de Patrimônio — Brasil</div>
+    <div class="topbar-m">Cadastro CVM · Ref. {now}</div></div>
     <span class="updated">⬤ Atualizado {now}</span>
   </div>
   <div class="content">
@@ -340,18 +304,18 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
       <div class="card">
         <div class="card-t">Crescimento da indústria</div>
         <div class="card-sub">Registros ativos por ano · CVM</div>
-        <div class="ch" style="height:180px"><canvas id="growthChart"></canvas></div>
+        <div style="height:180px"><canvas id="growthChart"></canvas></div>
       </div>
       <div class="card">
         <div class="card-t">Perfil do universo</div>
-        <div class="card-sub">Por tipo de gestão</div>
-        <div class="ch" style="height:110px"><canvas id="typeChart"></canvas></div>
+        <div class="card-sub">Por classificação</div>
+        <div style="height:110px"><canvas id="typeChart"></canvas></div>
         <ul class="blist">{"".join(f'<li class="bitem"><span class="bcolor" style="background:{c}"></span><span class="bname">{k}</span><span class="bcnt">{v}</span></li>' for (k,v),c in zip(sorted(tipo_dist.items(),key=lambda x:-x[1]),["#b8965a","#1a3a6b","#4a2d7a","#2d6a4f","#888"]))}</ul>
       </div>
       <div class="card">
         <div class="card-t">Concentração por UF</div>
         <div class="card-sub">Top estados · MFOs</div>
-        <div class="ch" style="height:180px"><canvas id="stateChart"></canvas></div>
+        <div style="height:180px"><canvas id="stateChart"></canvas></div>
       </div>
     </div>
     <div class="sec-hd">
@@ -361,13 +325,13 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>Sanções</th><th>Score M&A</th><th>Contato</th></tr></thead>
+        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>Categoria CVM</th><th>Score M&A</th><th>Contato</th></tr></thead>
         <tbody>{rows}</tbody>
       </table>
     </div>
     <div class="fnote">
       Fonte: CVM Dados Abertos (dados.cvm.gov.br) · Atualização automática via GitHub Actions · {now}<br>
-      MFOs identificados por heurística: nome social + tipo de gestão. Score M&A: modelo 0–10.<br>
+      MFOs identificados por heurística: nome social + categoria CVM. Score M&A: modelo 0–10.<br>
       Este dashboard não constitui recomendação de investimento.
     </div>
   </div>
@@ -376,11 +340,10 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
 <script>
 const mono="'DM Mono',monospace",gold="#b8965a",lineC="#e0ddd8",ink="#0d0d0d";
 new Chart(document.getElementById('growthChart'),{{type:'line',data:{{labels:{anos_evo},datasets:[{{label:'Registros',data:{counts_evo},borderColor:ink,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:.4}}]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{color:lineC}},ticks:{{font:{{family:mono,size:8}},color:'#aaa',maxTicksLimit:8}}}},y:{{grid:{{color:lineC}},ticks:{{font:{{family:mono,size:8}},color:'#aaa'}}}}}}}}}});
-new Chart(document.getElementById('typeChart'),{{type:'doughnut',data:{{labels:{tipo_labels},datasets:[{{data:{tipo_vals},backgroundColor:['#b8965a','#1a3a6b','#4a2d7a','#2d6a4f','#888'],borderWidth:0}}]}},options:{{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{{legend:{{display:false}}}}}}}});
+new Chart(document.getElementById('typeChart'),{{type:'doughnut',data:{{labels:{tipo_labels},datasets:[{{data:{tipo_vals},backgroundColor:['#b8965a','#1a3a6b','#4a2d7a'],borderWidth:0}}]}},options:{{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{{legend:{{display:false}}}}}}}});
 new Chart(document.getElementById('stateChart'),{{type:'bar',data:{{labels:{geo_labels},datasets:[{{data:{geo_vals},backgroundColor:gold+'cc',borderWidth:0,borderRadius:3}}]}},options:{{responsive:true,maintainAspectRatio:false,plugins:{{legend:{{display:false}}}},scales:{{x:{{grid:{{display:false}},ticks:{{font:{{family:mono,size:9}},color:'#aaa'}}}},y:{{grid:{{color:lineC}},ticks:{{font:{{family:mono,size:9}},color:'#aaa'}}}}}}}}}});
 </script>
-</body>
-</html>"""
+</body></html>"""
 
 if __name__ == "__main__":
     main()
