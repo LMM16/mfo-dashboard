@@ -141,18 +141,22 @@ def main():
         try:
             ano = int(str(r["DT_REGISTRO"])[:4])
             anos = date.today().year - ano
-            if 5 <= anos <= 15: s += 2.5
-            elif 3 <= anos < 5 or 15 < anos <= 20: s += 1.5
+            if 5 <= anos <= 15: s += 2.0
+            elif 3 <= anos < 5 or 15 < anos <= 20: s += 1.0
             elif anos > 0: s += 0.5
         except: pass
-        if r["IS_MFO"]: s += 2.5
-        if str(r["UF"]).strip().upper() in ("SP","RJ"): s += 1.5
+        if r["IS_MFO"]: s += 2.0
+        if str(r["UF"]).strip().upper() in ("SP","RJ"): s += 1.0
         elif str(r["UF"]).strip().upper() in ("MG","RS","PR","DF"): s += 0.5
-        if str(r.get("EMAIL","")).strip() not in ("","nan","N/A"): s += 1.0
+        if str(r.get("EMAIL","")).strip() not in ("","nan","N/A"): s += 0.5
         if str(r.get("SITE","")).strip() not in ("","nan","N/A"): s += 0.5
+        # PL da gestora como proxy de porte (peso 4.0)
         try:
             pl = float(str(r.get("PATRIM_LIQ","")).replace(",","."))
-            if pl > 0: s += 2.0
+            if pl >= 50_000_000:   s += 4.0   # >= R$50M
+            elif pl >= 10_000_000: s += 3.0   # >= R$10M
+            elif pl >= 1_000_000:  s += 2.0   # >= R$1M
+            elif pl > 0:           s += 1.0
         except: pass
         return round(min(s, 10.0), 1)
 
@@ -198,12 +202,26 @@ def build_html(df_mfo, df_all, evolucao, geo, tipo_dist, n_alvos, n_novos):
                    if email and email not in ("nan","N/A","") else "—")
         site_html = (f'<a href="{site}" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a>'
                      if site and site not in ("nan","N/A","") else "")
+        # Formatar PL
+        try:
+            pl_val = float(str(r.get("PATRIM_LIQ","")).replace(",","."))
+            if pl_val >= 1_000_000_000:
+                pl_fmt = f"R$ {pl_val/1_000_000_000:.1f}B"
+            elif pl_val >= 1_000_000:
+                pl_fmt = f"R$ {pl_val/1_000_000:.1f}M"
+            elif pl_val > 0:
+                pl_fmt = f"R$ {pl_val/1_000:.0f}K"
+            else:
+                pl_fmt = "—"
+        except:
+            pl_fmt = "—"
+
         rows += f"""<tr>
           <td><span class="mono subtle">{i:02d}</span></td>
           <td><div class="firm-name">{nome}</div><div class="mono micro subtle">{cnpj}</div></td>
           <td><span class="mono small">{uf}</span></td>
           <td><span class="mono micro">{ano}</span></td>
-          <td><span class="mono micro" style="color:var(--muted)">{categ[:30]}</span></td>
+          <td><span class="mono small" style="color:var(--ink);font-weight:600">{pl_fmt}</span></td>
           <td><span class="score-dot {sc}">{score}</span></td>
           <td>{em_html} {site_html}</td>
         </tr>"""
@@ -325,7 +343,7 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>Categoria CVM</th><th>Score M&A</th><th>Contato</th></tr></thead>
+        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>PL Gestora</th><th>Score M&A</th><th>Contato</th></tr></thead>
         <tbody>{rows}</tbody>
       </table>
     </div>
