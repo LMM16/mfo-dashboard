@@ -237,26 +237,34 @@ def build_html(df_mfo, df_all, evolucao, geo, tipo_dist, n_alvos, n_novos):
                    if email and email not in ("nan","N/A","") else "—")
         site_html = (f'<a href="{site}" target="_blank" style="color:var(--blue);font-size:9px">↗ site</a>'
                      if site and site not in ("nan","N/A","") else "")
-        # Formatar PL
-        try:
-            pl_val = float(str(r.get("PATRIM_LIQ","")).replace(",","."))
-            if pl_val >= 1_000_000_000:
-                pl_fmt = f"R$ {pl_val/1_000_000_000:.1f}B"
-            elif pl_val >= 1_000_000:
-                pl_fmt = f"R$ {pl_val/1_000_000:.1f}M"
-            elif pl_val > 0:
-                pl_fmt = f"R$ {pl_val/1_000:.0f}K"
+# Sócios e responsáveis
+        socios_raw = str(r.get("SOCIOS_NOMES","")).strip()
+        resp_raw   = str(r.get("RESP_NOMES","")).strip()
+
+        if socios_raw and socios_raw not in ("nan",""):
+            nomes = [s.strip().title() for s in socios_raw.split(";") if s.strip()]
+            if len(nomes) <= 2:
+                socios_fmt = "<br>".join(nomes)
             else:
-                pl_fmt = "—"
-        except:
-            pl_fmt = "—"
+                socios_fmt = "<br>".join(nomes[:2]) + f'<br><span class="mono micro subtle">+{len(nomes)-2} sócios</span>'
+        else:
+            socios_fmt = '<span class="subtle">—</span>'
+
+        if resp_raw and resp_raw not in ("nan",""):
+            resps = [s.strip().title() for s in resp_raw.split(";") if s.strip()]
+            resp_fmt = resps[0] if resps else "—"
+            if len(resps) > 1:
+                resp_fmt += f'<br><span class="mono micro subtle">+{len(resps)-1}</span>'
+        else:
+            resp_fmt = '<span class="subtle">—</span>'
 
         rows += f"""<tr>
           <td><span class="mono subtle">{i:02d}</span></td>
           <td><div class="firm-name">{nome}</div><div class="mono micro subtle">{cnpj}</div></td>
           <td><span class="mono small">{uf}</span></td>
           <td><span class="mono micro">{ano}</span></td>
-          <td><span class="mono small" style="color:var(--ink);font-weight:600">{pl_fmt}</span></td>
+          <td><div style="font-size:11px;line-height:1.5">{socios_fmt}</div></td>
+          <td><div style="font-size:11px;line-height:1.5">{resp_fmt}</div></td>
           <td><span class="score-dot {sc}">{score}</span></td>
           <td>{em_html} {site_html}</td>
         </tr>"""
