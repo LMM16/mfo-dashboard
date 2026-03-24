@@ -73,15 +73,15 @@ tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
 <main class="main">
   <div class="topbar">
     <div><div class="topbar-t">MFOs &amp; Gestores de Patrimônio — Brasil</div>
-    <div class="topbar-m">Cadastro CVM · Ref. 23/03/2026 18:48</div></div>
-    <span class="updated">⬤ Atualizado 23/03/2026 18:48</span>
+    <div class="topbar-m">Cadastro CVM · Ref. 24/03/2026 17:35</div></div>
+    <span class="updated">⬤ Atualizado 24/03/2026 17:35</span>
   </div>
   <div class="content">
     <div class="kpi-strip">
-      <div class="kpi"><div class="kpi-l">Firmas ativas (CVM)</div><div class="kpi-v">1,506</div><div class="kpi-d">Adm. carteira + Consultores</div></div>
+      <div class="kpi"><div class="kpi-l">Firmas ativas (CVM)</div><div class="kpi-v">1,501</div><div class="kpi-d">Adm. carteira + Consultores</div></div>
       <div class="kpi"><div class="kpi-l">MFOs identificados</div><div class="kpi-v">91</div><div class="kpi-d">Heurística multicritério</div></div>
       <div class="kpi"><div class="kpi-l">Alvos M&amp;A (score ≥ 6)</div><div class="kpi-v">87</div><div class="kpi-d" style="color:var(--gold)">⬤ Alta prioridade</div></div>
-      <div class="kpi"><div class="kpi-l">Novos em 2026</div><div class="kpi-v">21</div><div class="kpi-d">Registros no ano</div></div>
+      <div class="kpi"><div class="kpi-l">Novos em 2026</div><div class="kpi-v">23</div><div class="kpi-d">Registros no ano</div></div>
     </div>
     <div class="grid-3">
       <div class="card">
@@ -93,7 +93,7 @@ tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
         <div class="card-t">Perfil do universo</div>
         <div class="card-sub">Por classificação</div>
         <div style="height:110px"><canvas id="typeChart"></canvas></div>
-        <ul class="blist"><li class="bitem"><span class="bcolor" style="background:#b8965a"></span><span class="bname">Outro</span><span class="bcnt">1415</span></li><li class="bitem"><span class="bcolor" style="background:#1a3a6b"></span><span class="bname">MFO/Wealth Management</span><span class="bcnt">91</span></li></ul>
+        <ul class="blist"><li class="bitem"><span class="bcolor" style="background:#b8965a"></span><span class="bname">Outro</span><span class="bcnt">1410</span></li><li class="bitem"><span class="bcolor" style="background:#1a3a6b"></span><span class="bname">MFO/Wealth Management</span><span class="bcnt">91</span></li></ul>
       </div>
       <div class="card">
         <div class="card-t">Concentração por UF</div>
@@ -513,7 +513,7 @@ tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
       </table>
     </div>
     <div class="fnote">
-      Fonte: CVM Dados Abertos (dados.cvm.gov.br) · Atualização automática via GitHub Actions · 23/03/2026 18:48<br>
+      Fonte: CVM Dados Abertos (dados.cvm.gov.br) · Atualização automática via GitHub Actions · 24/03/2026 17:35<br>
       MFOs identificados por heurística: nome social + categoria CVM. Score M&A: modelo 0–10.<br>
       Este dashboard não constitui recomendação de investimento.
     </div>
@@ -522,8 +522,8 @@ tbody td{padding:11px 20px;font-size:12px;vertical-align:middle}
 </div>
 <script>
 const mono="'DM Mono',monospace",gold="#b8965a",lineC="#e0ddd8",ink="#0d0d0d";
-new Chart(document.getElementById('growthChart'),{type:'line',data:{labels:["1989", "1990", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],datasets:[{label:'Registros',data:[3, 8, 6, 2, 4, 6, 1, 9, 6, 9, 9, 11, 7, 23, 18, 22, 28, 45, 43, 41, 54, 66, 55, 70, 41, 52, 27, 43, 62, 50, 72, 144, 128, 104, 104, 112, 21],borderColor:ink,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa',maxTicksLimit:8}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa'}}}}});
-new Chart(document.getElementById('typeChart'),{type:'doughnut',data:{labels:["Outro", "MFO/Wealth Management"],datasets:[{data:[1415, 91],backgroundColor:['#b8965a','#1a3a6b','#4a2d7a'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('growthChart'),{type:'line',data:{labels:["1989", "1990", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"],datasets:[{label:'Registros',data:[3, 8, 6, 2, 4, 6, 1, 9, 6, 9, 9, 11, 7, 23, 17, 21, 26, 45, 43, 41, 54, 66, 55, 70, 41, 52, 27, 42, 62, 49, 72, 143, 128, 104, 104, 112, 23],borderColor:ink,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa',maxTicksLimit:8}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:8},color:'#aaa'}}}}});
+new Chart(document.getElementById('typeChart'),{type:'doughnut',data:{labels:["Outro", "MFO/Wealth Management"],datasets:[{data:[1410, 91],backgroundColor:['#b8965a','#1a3a6b','#4a2d7a'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}});
 new Chart(document.getElementById('stateChart'),{type:'bar',data:{labels:["SP", "RJ", "RS", "MG", "GO", "SC", "SE"],datasets:[{data:[71, 11, 3, 2, 2, 1, 1],backgroundColor:gold+'cc',borderWidth:0,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:mono,size:9},color:'#aaa'}},y:{grid:{color:lineC},ticks:{font:{family:mono,size:9},color:'#aaa'}}}}});
 </script>
 </body></html>
