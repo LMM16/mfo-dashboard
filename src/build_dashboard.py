@@ -378,8 +378,7 @@ tbody td{{padding:11px 20px;font-size:12px;vertical-align:middle}}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>PL Gestora</th><th>Score M&A</th><th>Contato</th></tr></thead>
-        <tbody>{rows}</tbody>
+<thead><tr><th>#</th><th>Firma</th><th>UF</th><th>Registro</th><th>Sócios</th><th>Responsáveis</th><th>Score M&A</th><th>Contato</th></tr></thead>        <tbody>{rows}</tbody>
       </table>
     </div>
     <div class="fnote">
