@@ -280,6 +280,9 @@ def main():
     print(f"   Ativos: {len(df_ativos)}")
 
     print("\n3. Identificando MFOs...")
+    if df_ativos.empty or "NOME_SOCIAL" not in df_ativos.columns:
+        print("ERRO: dados da CVM indisponiveis ou vazios. Abortando.")
+        sys.exit(0)
     df_ativos["IS_MFO"] = df_ativos["NOME_SOCIAL"].apply(is_mfo)
     df_ativos["IS_MFO"] |= df_ativos["CATEG_REG"].str.lower().str.contains("patrimonio|patrimônio|wealth", na=False)
     n_mfo = int(df_ativos["IS_MFO"].sum())
